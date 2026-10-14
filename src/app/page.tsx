@@ -37,7 +37,21 @@ export default function HomePage() {
 
       const savedCoupon = localStorage.getItem(STORAGE_KEY_COUPON);
       if (savedCoupon) {
-        setCouponData(JSON.parse(savedCoupon));
+        const parsed = JSON.parse(savedCoupon);
+        // Check if saved coupon is already expired
+        if (parsed?.validUntil) {
+          const parts = parsed.validUntil.split('.').map(Number);
+          if (parts.length >= 3) {
+            const validDate = new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59);
+            if (validDate < new Date()) {
+              // Expired coupon: remove it so a fresh one can be issued
+              localStorage.removeItem(STORAGE_KEY_COUPON);
+              setCouponData(null);
+              return;
+            }
+          }
+        }
+        setCouponData(parsed);
       }
     } catch (e) {
       console.error('LocalStorage init error', e);
@@ -54,15 +68,15 @@ export default function HomePage() {
     }
   };
 
-  // Generate unique coupon
-  const generateCoupon = () => {
-    if (couponData) return couponData;
+  // Generate unique coupon (fresh upon game completion)
+  const generateCoupon = (forceNew = false) => {
+    if (!forceNew && couponData) return couponData;
 
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const now = new Date();
     const issueDateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(
       now.getDate()
-    ).padStart(2, '0')}`;
+    ).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
     const validDate = new Date(now);
     validDate.setDate(validDate.getDate() + 30);
@@ -94,9 +108,9 @@ export default function HomePage() {
     updateFoundItems(nextIds);
     setModalItem(item);
 
-    // If all items found, generate coupon
+    // If all items found, generate a brand-new coupon with the current timestamp!
     if (nextIds.length >= HIDDEN_ITEMS.length) {
-      generateCoupon();
+      generateCoupon(true);
     }
   };
 
@@ -113,8 +127,10 @@ export default function HomePage() {
       setShowCouponModal(false);
       setShowHints(false);
       setActiveHintItemId(null);
+      setCouponData(null);
       try {
         localStorage.removeItem(STORAGE_KEY_FOUND);
+        localStorage.removeItem(STORAGE_KEY_COUPON);
       } catch (e) {
         console.error(e);
       }
@@ -131,6 +147,13 @@ export default function HomePage() {
   };
 
   const isAllFound = foundItemIds.length >= HIDDEN_ITEMS.length;
+
+  const handleOpenCoupon = () => {
+    if (!couponData) {
+      generateCoupon(true);
+    }
+    setShowCouponModal(true);
+  };
 
   return (
     <main className="min-h-screen flex flex-col bg-[#FFFDF9] text-[#2A1E17]">
@@ -182,7 +205,7 @@ export default function HomePage() {
             </div>
 
             <button
-              onClick={() => setShowCouponModal(true)}
+              onClick={handleOpenCoupon}
               className="w-full sm:w-auto px-6 py-3 bg-white text-[#8A5231] font-black text-sm rounded-xl shadow hover:bg-[#FFF6ED] active:scale-95 transition-all shrink-0"
             >
               🎟️ 15% 할인 쿠폰 보기
@@ -295,7 +318,7 @@ export default function HomePage() {
       {isAllFound && !showCouponModal && !modalItem && (
         <div className="fixed bottom-5 right-5 z-40 animate-bounce-gentle">
           <button
-            onClick={() => setShowCouponModal(true)}
+            onClick={handleOpenCoupon}
             className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-[#E66A2B] to-[#E5A93C] text-white font-extrabold text-sm rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all border-2 border-white"
           >
             <Gift className="w-4 h-4" />

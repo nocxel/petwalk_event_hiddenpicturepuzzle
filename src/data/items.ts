@@ -116,6 +116,7 @@ export const STORE_INFO = {
   mainDomain: 'petwalk.kr',
   coupon: {
     title: 'PETWALK 매장 전용 15% 할인 쿠폰',
+    applicableItems: '(가방, 카시트, 목줄, 장난감, 간식 적용)',
     discountRate: '15% OFF',
     notice: '※ 매장 할인과 중복으로 적용되지 않습니다.',
     instruction: '매장에서 계산할 때 직원에게 이 화면(또는 캡처본)을 보여주세요.',

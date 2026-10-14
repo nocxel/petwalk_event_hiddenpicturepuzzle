@@ -114,7 +114,7 @@ export default function CouponModal({
             축하합니다! 모두 찾으셨습니다 🎉
           </h2>
           <p className="text-xs text-[#FFE0C2] mt-0.5">
-            PETWALK 매장에서 사용 가능한 15% 할인 쿠폰이 발급되었습니다!
+            PETWALK 매장 및 택배 주문 시 사용 가능한 15% 할인 쿠폰이 발급되었습니다!
           </p>
         </div>
 
@@ -142,9 +142,14 @@ export default function CouponModal({
                   </p>
                 </div>
               </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E66A2B] text-white">
-                매장 전용
-              </span>
+              <div className="flex flex-col items-end gap-1 shrink-0">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E66A2B] text-white">
+                  매장 전용
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2563EB] text-white">
+                  택배 가능
+                </span>
+              </div>
             </div>
 
             {/* Coupon Value Display */}
@@ -157,6 +162,9 @@ export default function CouponModal({
               </div>
               <p className="text-sm font-bold text-[#3A2016] mt-1">
                 {STORE_INFO.coupon.title}
+              </p>
+              <p className="text-xs font-bold text-[#B45309] mt-1">
+                {STORE_INFO.coupon.applicableItems}
               </p>
             </div>
 
@@ -183,9 +191,11 @@ export default function CouponModal({
                 <span className="text-[#9E8270]">발급 일시:</span>
                 <span className="font-medium">{issueDate}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-[#9E8270]">유효 기간:</span>
-                <span className="font-bold text-[#E66A2B]">{validUntil} 까지</span>
+                <span className="font-bold text-[#E66A2B]">
+                  발급일로부터 30일 ({validUntil} 까지)
+                </span>
               </div>
             </div>
 
@@ -251,10 +261,10 @@ export default function CouponModal({
           <div className="bg-[#FAF3EB] rounded-2xl p-3.5 border border-[#E8DACB] text-xs text-[#6B4B36] space-y-1.5">
             <div className="flex items-center gap-1.5 font-bold text-[#3A2016]">
               <MapPin className="w-4 h-4 text-[#E66A2B]" />
-              <span>PETWALK 오프라인 매장 안내</span>
+              <span>PETWALK 매장 및 택배 주문 안내</span>
             </div>
             <p className="text-[11px] text-[#7C5D48] leading-relaxed">
-              매장에 방문하셔서 마음에 드는 상품을 고르신 후, 계산대에서 본 화면 또는 캡처해 두신 이미지를 직원에게 보여주시면 15% 즉시 할인이 적용됩니다.
+              매장 방문 결제 시 또는 택배 주문 시 본 화면 또는 캡처해 두신 이미지를 제시해주시면 15% 즉시 할인이 적용됩니다. (발급일로부터 30일간 사용 가능)
             </p>
           </div>
 
