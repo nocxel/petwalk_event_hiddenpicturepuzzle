@@ -1,15 +1,53 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Download, Share2, Check, Sparkles, MapPin, AlertCircle, Copy, RefreshCw } from 'lucide-react';
+import {
+  Download,
+  Check,
+  Sparkles,
+  MapPin,
+  AlertCircle,
+  Copy,
+  RefreshCw,
+  Trophy,
+  Crown,
+  Gift,
+  Heart,
+  ExternalLink,
+} from 'lucide-react';
 import { toPng } from 'html-to-image';
 import confetti from 'canvas-confetti';
 import { STORE_INFO } from '@/data/items';
+
+function InstagramIcon({ className = 'w-4 h-4' }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+    </svg>
+  );
+}
+
+const INSTAGRAM_POST_URL = 'https://www.instagram.com/p/DeeNI2iCZhe/';
 
 interface CouponModalProps {
   couponCode: string;
   issueDate: string;
   validUntil: string;
+  discountRate: 10 | 15;
+  reissueCount: number; // 0: 첫 발급(재발급 1회 가능), 1: 재발급 완료
+  hasVisitedInsta: boolean; // 인스타 방문 여부
+  onVisitInsta: () => void;
+  onReissueCoupon: () => Promise<10 | 15> | (10 | 15);
   onClose: () => void;
   onResetGame: () => void;
 }
@@ -18,68 +56,141 @@ export default function CouponModal({
   couponCode,
   issueDate,
   validUntil,
+  discountRate,
+  reissueCount,
+  hasVisitedInsta,
+  onVisitInsta,
+  onReissueCoupon,
   onClose,
   onResetGame,
 }: CouponModalProps) {
   const couponCardRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
-  const [capturedImageUrl, setCapturedImageUrl] = useState<string | null>(null);
+  const [isReissuing, setIsReissuing] = useState(false);
   const [showToast, setShowToast] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
 
-  // Trigger celebration confetti on mount
-  useEffect(() => {
-    const duration = 2.5 * 1000;
-    const animationEnd = Date.now() + duration;
+  // 인스타그램 게시물 열기 및 방문 상태 갱신
+  const handleOpenInstagram = () => {
+    window.open(INSTAGRAM_POST_URL, '_blank', 'noopener,noreferrer');
+    onVisitInsta();
+    triggerToast('인스타그램으로 이동합니다! 게시물 ❤️ 좋아요를 누르고 돌아와주세요.');
+  };
 
-    const frame = () => {
-      confetti({
-        particleCount: 4,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.7 },
-        colors: ['#E66A2B', '#E5A93C', '#8A5231', '#52B788'],
-      });
-      confetti({
-        particleCount: 4,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.7 },
-        colors: ['#E66A2B', '#E5A93C', '#8A5231', '#52B788'],
-      });
-
-      if (Date.now() < animationEnd) {
-        requestAnimationFrame(frame);
+  // 빠방하고 신나는 15% 최대혜택 세레모니 폭죽 이펙트
+  const triggerMegaCelebration = () => {
+    // 1. 모바일 기기 햅틱 피드백 (지원 기기)
+    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate([100, 50, 100, 50, 200]);
+      } catch {
+        // ignore
       }
-    };
-    frame();
-  }, []);
+    }
+
+    // 2. 화면 좌/우 대형 캐논 폭발 (1차)
+    confetti({
+      particleCount: 70,
+      angle: 60,
+      spread: 75,
+      origin: { x: 0, y: 0.65 },
+      colors: ['#FFD700', '#FFA500', '#FF4500', '#FF1493', '#00E5FF', '#7000FF'],
+      scalar: 1.2,
+    });
+    confetti({
+      particleCount: 70,
+      angle: 120,
+      spread: 75,
+      origin: { x: 1, y: 0.65 },
+      colors: ['#FFD700', '#FFA500', '#FF4500', '#FF1493', '#00E5FF', '#7000FF'],
+      scalar: 1.2,
+    });
+
+    // 3. 중앙에서 솟구치는 황금빛 별과 링 파티클 (0.25초 뒤)
+    setTimeout(() => {
+      confetti({
+        particleCount: 90,
+        spread: 120,
+        origin: { x: 0.5, y: 0.45 },
+        shapes: ['star', 'circle'],
+        colors: ['#FFE8A3', '#FFD700', '#FFA000', '#FF6D00', '#FFFFFF', '#FF3E3E'],
+        scalar: 1.3,
+      });
+    }, 250);
+
+    // 4. 약 3.5초 동안 사방에서 연속으로 팡팡 터지는 화려한 불꽃놀이 (Fireworks)
+    const duration = 3.5 * 1000;
+    const animationEnd = Date.now() + duration;
+    const fireworksInterval: NodeJS.Timeout = setInterval(() => {
+      const timeLeft = animationEnd - Date.now();
+      if (timeLeft <= 0) {
+        clearInterval(fireworksInterval);
+        return;
+      }
+      const particleCount = 35 * (timeLeft / duration);
+      confetti({
+        particleCount,
+        startVelocity: 30,
+        spread: 360,
+        ticks: 60,
+        origin: {
+          x: Math.random() * 0.8 + 0.1,
+          y: Math.random() * 0.45 + 0.1,
+        },
+        colors: ['#FFD700', '#FF3E3E', '#00E5FF', '#FF00FF', '#76FF03', '#FFD600', '#FF6D00'],
+        shapes: ['star', 'circle'],
+      });
+    }, 320);
+  };
+
+  // 10% 쿠폰 시 은은하고 차분한 기본 축하 이펙트
+  const triggerStandardCelebration = () => {
+    confetti({
+      particleCount: 25,
+      angle: 60,
+      spread: 50,
+      origin: { x: 0.1, y: 0.7 },
+      colors: ['#E66A2B', '#E5A93C', '#8A5231'],
+    });
+    confetti({
+      particleCount: 25,
+      angle: 120,
+      spread: 50,
+      origin: { x: 0.9, y: 0.7 },
+      colors: ['#E66A2B', '#E5A93C', '#8A5231'],
+    });
+  };
+
+  // 모달 오픈 시 당첨된 쿠폰 할인율에 맞춰 이펙트 실행
+  useEffect(() => {
+    if (discountRate === 15) {
+      triggerMegaCelebration();
+    } else {
+      triggerStandardCelebration();
+    }
+  }, [discountRate]);
 
   const triggerToast = (msg: string) => {
     setShowToast(msg);
-    setTimeout(() => setShowToast(null), 3000);
+    setTimeout(() => setShowToast(null), 3500);
   };
 
+  // 이미지 캡처 저장
   const handleCapture = async () => {
     if (!couponCardRef.current) return;
 
     try {
       setIsCapturing(true);
-
-      // Give a tiny tick for style stabilization
-      await new Promise((r) => setTimeout(r, 100));
+      await new Promise((r) => setTimeout(r, 120));
 
       const dataUrl = await toPng(couponCardRef.current, {
         quality: 0.98,
-        pixelRatio: 2, // High resolution for crisp barcodes and text
+        pixelRatio: 2,
         backgroundColor: '#FFFDF9',
       });
 
-      setCapturedImageUrl(dataUrl);
-
-      // Try file download
       const link = document.createElement('a');
-      link.download = `PETWALK_쿠폰_${couponCode}.png`;
+      link.download = `PETWALK_쿠폰_${discountRate}프로_${couponCode}.png`;
       link.href = dataUrl;
       link.click();
 
@@ -92,6 +203,7 @@ export default function CouponModal({
     }
   };
 
+  // 쿠폰 코드 복사
   const handleCopyCode = () => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(couponCode);
@@ -101,21 +213,75 @@ export default function CouponModal({
     }
   };
 
+  // 1회 재발급 시도 핸들러
+  const handleReissue = async () => {
+    if (reissueCount >= 1 || isReissuing) return;
+
+    setIsReissuing(true);
+
+    // 긴장감과 재미를 주는 0.8초 추첨 연출
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
+    try {
+      const newRate = await onReissueCoupon();
+      if (newRate === 15) {
+        triggerMegaCelebration();
+        triggerToast('🎊 대박! 최대 혜택 15% 할인 쿠폰에 당첨되셨습니다!');
+      } else {
+        triggerToast('10% 할인 쿠폰으로 최종 확정되었습니다!');
+      }
+    } catch (err) {
+      console.error('Reissue error:', err);
+      triggerToast('재발급 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsReissuing(false);
+    }
+  };
+
+  const is15Percent = discountRate === 15;
+  const canReissue = reissueCount === 0 && !is15Percent;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-md overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md overflow-y-auto">
       <div className="w-full max-w-md my-auto bg-[#FFFDF9] rounded-3xl shadow-2xl border-2 border-[#EAD5C2] overflow-hidden transform transition-all animate-scaleUp">
-        {/* Header Banner */}
-        <div className="bg-gradient-to-r from-[#8A5231] via-[#C8672D] to-[#E66A2B] px-5 py-4 text-white text-center">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 rounded-full text-xs font-bold mb-1 backdrop-blur-sm">
-            <Sparkles className="w-3.5 h-3.5 text-[#FFE8A3]" />
-            MISSION COMPLETE
-          </div>
-          <h2 className="text-xl sm:text-2xl font-black text-white">
-            축하합니다! 모두 찾으셨습니다 🎉
-          </h2>
-          <p className="text-xs text-[#FFE0C2] mt-0.5">
-            PETWALK 매장 및 택배 주문 시 사용 가능한 15% 할인 쿠폰이 발급되었습니다!
-          </p>
+        {/* Header Banner - 15% 당첨 시 화려한 골드 & 앰버 테마 */}
+        <div
+          className={`px-5 py-4 text-white text-center relative overflow-hidden transition-all duration-500 ${
+            is15Percent
+              ? 'bg-gradient-to-r from-[#B45309] via-[#D97706] to-[#F59E0B]'
+              : 'bg-gradient-to-r from-[#8A5231] via-[#C8672D] to-[#E66A2B]'
+          }`}
+        >
+          {/* 반짝이 광택 효과 */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full animate-[shimmer_2.5s_infinite]" />
+
+          {is15Percent ? (
+            <>
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-white/25 rounded-full text-xs font-black mb-1 backdrop-blur-md shadow-sm border border-yellow-200/40">
+                <Crown className="w-4 h-4 text-yellow-200 animate-bounce" />
+                <span className="tracking-wider text-yellow-100">LUCKY JACKPOT!</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-white flex items-center justify-center gap-1.5 drop-shadow-md">
+                <span>🎉</span> 축하합니다! 최대혜택 당첨! <span>🎉</span>
+              </h2>
+              <p className="text-xs text-yellow-100 mt-1 font-semibold leading-relaxed">
+                축하합니다! 전 품목 <strong>15% 최대 할인 혜택</strong>에 당첨되셨습니다!
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 rounded-full text-xs font-bold mb-1 backdrop-blur-sm">
+                <Sparkles className="w-3.5 h-3.5 text-[#FFE8A3]" />
+                MISSION COMPLETE
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-white">
+                축하합니다! 모두 찾으셨습니다 🎉
+              </h2>
+              <p className="text-xs text-[#FFE0C2] mt-0.5">
+                PETWALK 매장 및 택배 주문 시 사용 가능한 10% 할인 쿠폰이 발급되었습니다!
+              </p>
+            </>
+          )}
         </div>
 
         {/* Scrollable Container */}
@@ -123,14 +289,31 @@ export default function CouponModal({
           {/* THE CAPTURABLE COUPON CARD */}
           <div
             ref={couponCardRef}
-            className="relative bg-gradient-to-b from-[#FFFDF9] to-[#FDF8F2] rounded-2xl border-2 border-dashed border-[#DDBFA8] p-5 shadow-inner text-[#3A2016] overflow-hidden"
+            className={`relative rounded-2xl border-2 border-dashed p-5 shadow-inner text-[#3A2016] overflow-hidden transition-all duration-300 ${
+              is15Percent
+                ? 'bg-gradient-to-b from-[#FFFDF2] to-[#FFF7E6] border-[#F59E0B] shadow-amber-100'
+                : 'bg-gradient-to-b from-[#FFFDF9] to-[#FDF8F2] border-[#DDBFA8]'
+            }`}
           >
             {/* Cut-out ticket circles */}
-            <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#FFFDF9] border-r-2 border-[#DDBFA8]" />
-            <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#FFFDF9] border-l-2 border-[#DDBFA8]" />
+            <div
+              className={`absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#FFFDF9] border-r-2 ${
+                is15Percent ? 'border-[#F59E0B]' : 'border-[#DDBFA8]'
+              }`}
+            />
+            <div
+              className={`absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#FFFDF9] border-l-2 ${
+                is15Percent ? 'border-[#F59E0B]' : 'border-[#DDBFA8]'
+              }`}
+            />
+
 
             {/* Top brand header */}
-            <div className="flex items-center justify-between pb-3 border-b border-[#EBD6C4]">
+            <div
+              className={`flex items-center justify-between pb-3 border-b ${
+                is15Percent ? 'border-[#FDE68A]' : 'border-[#EBD6C4]'
+              }`}
+            >
               <div className="flex items-center gap-2">
                 <span className="text-xl">🐾</span>
                 <div>
@@ -153,34 +336,55 @@ export default function CouponModal({
             </div>
 
             {/* Coupon Value Display */}
-            <div className="text-center py-4">
-              <span className="text-xs font-bold text-[#C8672D] tracking-widest uppercase block mb-1">
-                AUTUMN SPECIAL EVENT
+            <div className="text-center py-4 relative">
+              <span
+                className={`text-xs font-bold tracking-widest uppercase block mb-1 ${
+                  is15Percent ? 'text-[#B45309]' : 'text-[#C8672D]'
+                }`}
+              >
+                {is15Percent ? '★ AUTUMN SPECIAL JACKPOT ★' : 'AUTUMN SPECIAL EVENT'}
               </span>
-              <div className="text-4xl sm:text-5xl font-black tracking-tight text-[#8A5231]">
-                15% <span className="text-2xl sm:text-3xl font-bold">OFF</span>
+
+              <div
+                className={`text-4xl sm:text-5xl font-black tracking-tight flex items-center justify-center gap-1.5 ${
+                  is15Percent ? 'text-[#B45309]' : 'text-[#8A5231]'
+                }`}
+              >
+                <span>{discountRate}%</span>
+                <span className="text-2xl sm:text-3xl font-bold">OFF</span>
               </div>
-              <p className="text-sm font-bold text-[#3A2016] mt-1">
-                {STORE_INFO.coupon.title}
+
+              <p className="text-sm font-bold text-[#3A2016] mt-1.5">
+                PETWALK 매장 전용 {discountRate}% 할인 쿠폰
               </p>
-              <p className="text-xs font-bold text-[#B45309] mt-1">
+              <p className="text-xs font-bold text-[#B45309] mt-0.5">
                 {STORE_INFO.coupon.applicableItems}
               </p>
             </div>
 
             {/* Crucial Store Conditions & Instruction */}
-            <div className="bg-[#FAF0E6] rounded-xl p-3 border border-[#E9D5C4] text-center space-y-1.5 mb-3">
+            <div
+              className={`rounded-xl p-3 border text-center space-y-1.5 mb-3 ${
+                is15Percent
+                  ? 'bg-[#FFFBEB] border-[#FDE68A]'
+                  : 'bg-[#FAF0E6] border-[#E9D5C4]'
+              }`}
+            >
               <p className="text-xs font-extrabold text-[#9A3412] flex items-center justify-center gap-1">
                 <AlertCircle className="w-3.5 h-3.5" />
                 {STORE_INFO.coupon.notice}
               </p>
-              <p className="text-[11px] font-bold text-[#5C3821] bg-white/70 py-1 px-2 rounded-md border border-[#DFC3AD]">
+              <p className="text-[11px] font-bold text-[#5C3821] bg-white/80 py-1 px-2 rounded-md border border-[#DFC3AD]">
                 👉 {STORE_INFO.coupon.instruction}
               </p>
             </div>
 
             {/* Coupon Details Table */}
-            <div className="text-[11px] text-[#7A5A43] space-y-1 pb-3 border-b border-[#EBD6C4] px-1">
+            <div
+              className={`text-[11px] text-[#7A5A43] space-y-1 pb-3 border-b px-1 ${
+                is15Percent ? 'border-[#FDE68A]' : 'border-[#EBD6C4]'
+              }`}
+            >
               <div className="flex justify-between">
                 <span className="text-[#9E8270]">쿠폰 번호:</span>
                 <span className="font-mono font-bold text-[#3A2016] flex items-center gap-1">
@@ -221,13 +425,80 @@ export default function CouponModal({
             </div>
           </div>
 
+          {/* 재발급 섹션 (10% 쿠폰이거나 재발급 기회가 남아있는 경우) */}
+          {canReissue ? (
+            !hasVisitedInsta ? (
+              /* 1단계: 인스타 좋아요 미션 버튼 */
+              <div className="bg-gradient-to-r from-[#FFF5F7] via-[#FFF0F5] to-[#FFF7ED] rounded-2xl p-4 border-2 border-[#F687B3] shadow-sm space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-black text-[#B83280]">
+                    <Heart className="w-4 h-4 text-[#E53E3E] fill-[#E53E3E] animate-pulse" />
+                    <span>인스타 좋아요 누르고 15% 재발급 찬스!</span>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E53E3E] text-white">
+                    15% 확률 50%
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#702459] leading-relaxed">
+                  현재 <strong>10% 할인 쿠폰</strong>입니다. PETWALK 인스타그램 게시물에 <strong>❤️ 좋아요</strong>를 누르고 돌아오시면, <strong>15% 할인 당첨 확률이 50%</strong>인 재발급 기회가 즉시 열립니다! (단 1번 가능)
+                </p>
+                <button
+                  onClick={handleOpenInstagram}
+                  className="w-full py-3 px-3 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCB045] hover:brightness-105 active:scale-[0.99] text-white font-black text-xs sm:text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all"
+                >
+                  <InstagramIcon className="w-4 h-4" />
+                  <span>❤️ 인스타 좋아요 누르고 재발급 받기</span>
+                  <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                </button>
+              </div>
+            ) : (
+              /* 2단계: 인스타 방문 완료 후 재발급 버튼 활성화 */
+              <div className="bg-gradient-to-r from-[#FFF7ED] to-[#FEF3C7] rounded-2xl p-3.5 border-2 border-[#FBD38D] shadow-sm space-y-2 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-extrabold text-[#C05621]">
+                    <Sparkles className="w-4 h-4 text-[#DD6B20]" />
+                    <span>미션 완료! 재발급 기회 잠금 해제 (1회 남음)</span>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#DD6B20] text-white">
+                    15% 확률 50%
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#7B341E] leading-relaxed">
+                  인스타 미션 완료! 2번째 발급 도전 시{' '}
+                  <strong className="text-[#C05621] underline decoration-2">
+                    15% 할인 당첨 확률이 50%
+                  </strong>
+                  로 대폭 상승합니다! (단 1번만 가능)
+                </p>
+                <button
+                  onClick={handleReissue}
+                  disabled={isReissuing}
+                  className="w-full py-2.5 px-3 bg-gradient-to-r from-[#DD6B20] to-[#D69E2E] hover:brightness-105 active:scale-[0.99] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow flex items-center justify-center gap-1.5 transition-all disabled:opacity-75"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isReissuing ? 'animate-spin' : ''}`} />
+                  <span>
+                    {isReissuing ? '행운의 쿠폰 재추첨 중... 🎲' : '🎲 15% 당첨 도전! 쿠폰 다시 뽑기'}
+                  </span>
+                </button>
+              </div>
+            )
+          ) : !is15Percent ? (
+            <div className="bg-[#F7EFE6] rounded-xl p-2.5 border border-[#E8DACB] text-center text-xs font-medium text-[#7C5D48]">
+              <span>ℹ️ 재발급 기회(1회)를 모두 사용하셨습니다. (10% 할인 최종 확정)</span>
+            </div>
+          ) : null}
+
           {/* Action Buttons */}
           <div className="space-y-2 pt-1">
-            {/* 1. SCREENSHOT / CAPTURE BUTTON (MAIN USER REQUEST) */}
+            {/* 1. SCREENSHOT / CAPTURE BUTTON */}
             <button
               onClick={handleCapture}
               disabled={isCapturing}
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-[#E66A2B] to-[#E5A93C] hover:brightness-105 active:scale-[0.99] text-white font-bold text-sm sm:text-base rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all"
+              className={`w-full py-3.5 px-4 text-white font-bold text-sm sm:text-base rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] ${
+                is15Percent
+                  ? 'bg-gradient-to-r from-[#D97706] via-[#EA580C] to-[#E66A2B] hover:brightness-105'
+                  : 'bg-gradient-to-r from-[#E66A2B] to-[#E5A93C] hover:brightness-105'
+              }`}
             >
               <Download className="w-5 h-5" />
               <span>{isCapturing ? '쿠폰 저장 중...' : '📸 화면 캡처하기 (이미지로 저장)'}</span>
@@ -264,7 +535,7 @@ export default function CouponModal({
               <span>PETWALK 매장 및 택배 주문 안내</span>
             </div>
             <p className="text-[11px] text-[#7C5D48] leading-relaxed">
-              매장 방문 결제 시 또는 택배 주문 시 본 화면 또는 캡처해 두신 이미지를 제시해주시면 15% 즉시 할인이 적용됩니다. (발급일로부터 30일간 사용 가능)
+              매장 방문 결제 시 또는 택배 주문 시 본 화면 또는 캡처해 두신 이미지를 제시해주시면 {discountRate}% 즉시 할인이 적용됩니다. (발급일로부터 30일간 사용 가능)
             </p>
           </div>
 

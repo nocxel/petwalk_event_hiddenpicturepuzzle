@@ -7,10 +7,19 @@ import GameCanvas from '@/components/GameCanvas';
 import ItemFoundModal from '@/components/ItemFoundModal';
 import CouponModal from '@/components/CouponModal';
 import { HIDDEN_ITEMS, STORE_INFO, HiddenItem } from '@/data/items';
-import { Gift, Sparkles, MapPin, Clock, Phone, Share2, Check } from 'lucide-react';
+import { Gift, Sparkles, MapPin, Clock, Share2, Check } from 'lucide-react';
 
 const STORAGE_KEY_FOUND = 'petwalk_event_found_items';
 const STORAGE_KEY_COUPON = 'petwalk_event_coupon';
+
+export interface CouponData {
+  code: string;
+  issueDate: string;
+  validUntil: string;
+  discountRate: 10 | 15;
+  reissueCount: number; // 0: 첫 발급(재발급 1회 가능), 1: 재발급 완료(기회 소진)
+  hasVisitedInsta?: boolean; // 인스타 좋아요 미션 참여 여부
+}
 
 export default function HomePage() {
   const [foundItemIds, setFoundItemIds] = useState<string[]>([]);
@@ -19,12 +28,7 @@ export default function HomePage() {
   const [showHints, setShowHints] = useState<boolean>(false);
   const [activeHintItemId, setActiveHintItemId] = useState<string | null>(null);
 
-  const [couponData, setCouponData] = useState<{
-    code: string;
-    issueDate: string;
-    validUntil: string;
-  } | null>(null);
-
+  const [couponData, setCouponData] = useState<CouponData | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Initialize from LocalStorage
@@ -51,7 +55,65 @@ export default function HomePage() {
             }
           }
         }
+
+        // 하위 호환성 및 무결성 보정
+        if (parsed.discountRate !== 10 && parsed.discountRate !== 15) {
+          parsed.discountRate = 10;
+        }
+        if (typeof parsed.reissueCount !== 'number') {
+          parsed.reissueCount = 0;
+        }
+        if (typeof parsed.hasVisitedInsta !== 'boolean') {
+          parsed.hasVisitedInsta = false;
+        }
+
         setCouponData(parsed);
+      }
+
+      // 개발 및 검증용 콘솔 헬퍼 (F12 콘솔에서 즉시 테스트 가능)
+      if (typeof window !== 'undefined') {
+        (window as any).testCompleteAll = () => {
+          updateFoundItems(HIDDEN_ITEMS.map((i) => i.id));
+          const c = generateCoupon(false, true);
+          setShowCouponModal(true);
+          return `테스트 완료: ${c.discountRate}% 쿠폰 발급됨 (코드: ${c.code})`;
+        };
+        (window as any).test15Percent = () => {
+          updateFoundItems(HIDDEN_ITEMS.map((i) => i.id));
+          const now = new Date();
+          const validDate = new Date(now);
+          validDate.setDate(validDate.getDate() + 30);
+          const c: CouponData = {
+            code: `PW-AUTUMN15-${Math.floor(1000 + Math.random() * 9000)}`,
+            issueDate: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
+            validUntil: `${validDate.getFullYear()}.${String(validDate.getMonth() + 1).padStart(2, '0')}.${String(validDate.getDate()).padStart(2, '0')}`,
+            discountRate: 15,
+            reissueCount: 0,
+            hasVisitedInsta: false,
+          };
+          localStorage.setItem(STORAGE_KEY_COUPON, JSON.stringify(c));
+          setCouponData(c);
+          setShowCouponModal(true);
+          return '15% 최대혜택 당첨 모달 즉시 실행!';
+        };
+        (window as any).test10Percent = (visitedInsta = false) => {
+          updateFoundItems(HIDDEN_ITEMS.map((i) => i.id));
+          const now = new Date();
+          const validDate = new Date(now);
+          validDate.setDate(validDate.getDate() + 30);
+          const c: CouponData = {
+            code: `PW-AUTUMN10-${Math.floor(1000 + Math.random() * 9000)}`,
+            issueDate: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
+            validUntil: `${validDate.getFullYear()}.${String(validDate.getMonth() + 1).padStart(2, '0')}.${String(validDate.getDate()).padStart(2, '0')}`,
+            discountRate: 10,
+            reissueCount: 0,
+            hasVisitedInsta: visitedInsta,
+          };
+          localStorage.setItem(STORAGE_KEY_COUPON, JSON.stringify(c));
+          setCouponData(c);
+          setShowCouponModal(true);
+          return `10% 쿠폰 모달 즉시 실행 (인스타 방문 상태: ${visitedInsta ? '방문 완료' : '미방문(좋아요 버튼 표시)'})!`;
+        };
       }
     } catch (e) {
       console.error('LocalStorage init error', e);
@@ -68,9 +130,25 @@ export default function HomePage() {
     }
   };
 
-  // Generate unique coupon (fresh upon game completion)
-  const generateCoupon = (forceNew = false) => {
-    if (!forceNew && couponData) return couponData;
+  /**
+   * 쿠폰 생성 함수
+   * @param isReissue false: 최초 발급 (10% 쿠폰 90% / 15% 쿠폰 10%)
+   *                  true:  재발급 (10% 쿠폰 50% / 15% 쿠폰 50%)
+   * @param forceNew  기존 쿠폰 무시하고 강제 생성 여부
+   */
+  const generateCoupon = (isReissue = false, forceNew = false): CouponData => {
+    if (!forceNew && !isReissue && couponData) return couponData;
+
+    const rand = Math.random();
+    let discountRate: 10 | 15;
+
+    if (!isReissue) {
+      // 1번째 발급: 10% 쿠폰이 90% / 15% 쿠폰이 10%
+      discountRate = rand < 0.10 ? 15 : 10;
+    } else {
+      // 2번째 발급: 10% 쿠폰이 50% / 15% 쿠폰이 50%
+      discountRate = rand < 0.50 ? 15 : 10;
+    }
 
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const now = new Date();
@@ -84,10 +162,13 @@ export default function HomePage() {
       validDate.getDate()
     ).padStart(2, '0')}`;
 
-    const newCoupon = {
-      code: `PW-AUTUMN-${randomSuffix}`,
+    const newCoupon: CouponData = {
+      code: `PW-AUTUMN${discountRate}-${randomSuffix}`,
       issueDate: issueDateStr,
       validUntil: validUntilStr,
+      discountRate,
+      reissueCount: isReissue ? 1 : 0,
+      hasVisitedInsta: isReissue ? (couponData?.hasVisitedInsta ?? true) : (couponData?.hasVisitedInsta ?? false),
     };
 
     try {
@@ -100,6 +181,30 @@ export default function HomePage() {
     return newCoupon;
   };
 
+  // 인스타그램 좋아요 미션 링크 방문 처리
+  const handleVisitInsta = () => {
+    if (!couponData) return;
+    const updated: CouponData = {
+      ...couponData,
+      hasVisitedInsta: true,
+    };
+    try {
+      localStorage.setItem(STORAGE_KEY_COUPON, JSON.stringify(updated));
+    } catch (e) {
+      console.error(e);
+    }
+    setCouponData(updated);
+  };
+
+  // 재발급 실행 핸들러 (최대 1회 제한)
+  const handleReissueCoupon = (): 10 | 15 => {
+    if (!couponData || couponData.reissueCount >= 1) {
+      return couponData?.discountRate ?? 10;
+    }
+    const nextCoupon = generateCoupon(true, true);
+    return nextCoupon.discountRate;
+  };
+
   // Handle item discovered
   const handleItemFound = (item: HiddenItem) => {
     if (foundItemIds.includes(item.id)) return;
@@ -108,9 +213,11 @@ export default function HomePage() {
     updateFoundItems(nextIds);
     setModalItem(item);
 
-    // If all items found, generate a brand-new coupon with the current timestamp!
+    // If all items found, generate a fresh coupon if not already present
     if (nextIds.length >= HIDDEN_ITEMS.length) {
-      generateCoupon(true);
+      if (!couponData) {
+        generateCoupon(false, true);
+      }
     }
   };
 
@@ -149,8 +256,8 @@ export default function HomePage() {
   const isAllFound = foundItemIds.length >= HIDDEN_ITEMS.length;
 
   const handleOpenCoupon = () => {
-    if (!couponData) {
-      generateCoupon(true);
+    if (!couponData || !couponData.discountRate) {
+      generateCoupon(false, true);
     }
     setShowCouponModal(true);
   };
@@ -199,7 +306,9 @@ export default function HomePage() {
                   🎉 5가지 아이템을 모두 찾으셨습니다!
                 </h3>
                 <p className="text-xs text-[#FFF0E0]">
-                  매장에서 사용 가능한 15% 할인 쿠폰을 지금 바로 확인하고 캡처하세요.
+                  {couponData?.discountRate
+                    ? `발급된 ${couponData.discountRate}% 할인 쿠폰을 지금 바로 확인하고 캡처하세요.`
+                    : '매장에서 사용 가능한 할인 쿠폰(최대 15%)을 지금 바로 확인하고 캡처하세요.'}
                 </p>
               </div>
             </div>
@@ -208,7 +317,7 @@ export default function HomePage() {
               onClick={handleOpenCoupon}
               className="w-full sm:w-auto px-6 py-3 bg-white text-[#8A5231] font-black text-sm rounded-xl shadow hover:bg-[#FFF6ED] active:scale-95 transition-all shrink-0"
             >
-              🎟️ 15% 할인 쿠폰 보기
+              🎟️ {couponData?.discountRate ? `${couponData.discountRate}% 할인 쿠폰 보기` : '할인 쿠폰 보기'}
             </button>
           </div>
         )}
@@ -235,7 +344,7 @@ export default function HomePage() {
                   2
                 </span>
                 <span>
-                  <strong>쿠폰 발급 및 캡처:</strong> 5가지를 모두 찾으면 <strong>[15% 할인 쿠폰]</strong>이 즉시 발급됩니다.
+                  <strong>쿠폰 발급:</strong> 5가지를 모두 찾으면 <strong>[랜덤 할인 쿠폰 (10% 또는 15%)]</strong>이 즉시 발급됩니다. 아쉽다면 인스타 좋아요 미션 후 1회 재발급 찬스(15% 당첨 확률 50%)에 도전해보세요!
                 </span>
               </li>
               <li className="flex items-start gap-2">
@@ -243,7 +352,7 @@ export default function HomePage() {
                   3
                 </span>
                 <span>
-                  <strong>매장 제시:</strong> PETWALK 매장 방문 후 결제 시 캡처 화면을 직원에게 보여주세요!
+                  <strong>매장 제시:</strong> PETWALK 매장 방문 후 결제 시 캡처 화면을 직원에게 보여주세요! (택배 주문 시에도 사용 가능)
                 </span>
               </li>
             </ol>
@@ -263,7 +372,7 @@ export default function HomePage() {
                 </p>
                 <p className="flex items-center gap-2">
                   <Clock className="w-3.5 h-3.5 text-[#8A5231] shrink-0" />
-                  <span>영업시간: 화~일 11:00 ~ 20:00 (매주 월요일 정기휴무)</span>
+                  <span>영업시간: 11:30 ~ 21:30 (매주 월요일 정기휴무)</span>
                 </p>
                 <p className="flex items-center gap-2">
                   <span className="font-bold text-[#E66A2B]">💡 유의사항:</span>
@@ -299,16 +408,21 @@ export default function HomePage() {
         onClose={() => setModalItem(null)}
         onClaimCoupon={() => {
           setModalItem(null);
-          setShowCouponModal(true);
+          handleOpenCoupon();
         }}
       />
 
-      {/* Final 15% Discount Coupon Modal */}
+      {/* Discount Coupon Modal */}
       {showCouponModal && couponData && (
         <CouponModal
           couponCode={couponData.code}
           issueDate={couponData.issueDate}
           validUntil={couponData.validUntil}
+          discountRate={couponData.discountRate}
+          reissueCount={couponData.reissueCount}
+          hasVisitedInsta={couponData.hasVisitedInsta ?? false}
+          onVisitInsta={handleVisitInsta}
+          onReissueCoupon={handleReissueCoupon}
           onClose={() => setShowCouponModal(false)}
           onResetGame={handleReset}
         />
@@ -322,7 +436,7 @@ export default function HomePage() {
             className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-[#E66A2B] to-[#E5A93C] text-white font-extrabold text-sm rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all border-2 border-white"
           >
             <Gift className="w-4 h-4" />
-            <span>내 15% 쿠폰 보기</span>
+            <span>내 {couponData?.discountRate ? `${couponData.discountRate}% ` : ''}쿠폰 보기</span>
           </button>
         </div>
       )}

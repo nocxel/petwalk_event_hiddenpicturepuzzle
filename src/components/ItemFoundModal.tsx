@@ -106,7 +106,7 @@ export default function ItemFoundModal({
                 className="w-full py-3.5 px-4 bg-gradient-to-r from-[#E66A2B] via-[#E5833C] to-[#E5A93C] hover:brightness-105 active:scale-[0.99] text-white font-bold text-sm sm:text-base rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all"
               >
                 <Gift className="w-5 h-5" />
-                <span>모두 찾으셨습니다! 15% 쿠폰 받기 ➔</span>
+                <span>모두 찾으셨습니다! 할인 쿠폰 받기 ➔</span>
               </button>
             ) : (
               <button

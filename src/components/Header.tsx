@@ -40,7 +40,7 @@ export default function Header({
               </span>
             </div>
             <p className="text-[11px] text-[#8C6B55] hidden sm:block">
-              숨은 5가지 순간을 찾고 15% 할인 쿠폰을 받으세요!
+              숨은 5가지 순간을 찾고 최대 15% 할인 쿠폰을 받으세요!
             </p>
           </div>
         </div>
