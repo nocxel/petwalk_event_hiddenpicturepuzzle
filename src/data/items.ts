@@ -29,7 +29,7 @@ export const HIDDEN_ITEMS: HiddenItem[] = [
     category: 'Walk & Safety',
     tagline: '댕댕이의 안전하고 편안한 가을 산책 필수템',
     description: '보호자의 손을 잡고 예쁜 목줄과 하네스를 차고 발맞추어 걷는 사랑스러운 산책 댕댕이입니다.',
-    brands: ['아이캔더', '분독', '젠틀우프', '더포기도그', '파운드마이애니멀'],
+    brands: ['아이캔더', '분독', '젠틀우프', '더포기도그', '파운드마이애니멀', '수잔랜시'],
     hint: '중앙 산책 돌길(하단)에서 줄무늬 옷을 입은 사람과 함께 목줄을 하고 걷는 강아지를 찾아보세요!',
     imageUrl: '/images/items/leash_walk.png',
     target: {
@@ -65,7 +65,7 @@ export const HIDDEN_ITEMS: HiddenItem[] = [
     category: 'Travel & Carrier',
     tagline: '어디서나 감성 가득, 가볍고 포근한 외출용 펫 캐리어',
     description: '가족들의 즐거운 가을 피크닉 돗자리 위, 열린 이동가방 속에서 편안하게 고개를 내민 안락한 댕댕이입니다.',
-    brands: ['아이캔더', 'SSFW', '리카리카', '리토가토 등'],
+    brands: ['아이캔더', 'SSFW', '리카리카', '리토가토', '패스룸'],
     hint: '화면 왼쪽 잔디밭의 피크닉 돗자리 구역, 열려 있는 하늘색 이동가방 속을 돋보기로 살펴보세요!',
     imageUrl: '/images/items/carrier_picnic.png',
     target: {
@@ -81,7 +81,7 @@ export const HIDDEN_ITEMS: HiddenItem[] = [
     category: 'Healthy Treats',
     tagline: '믿을 수 있는 원료로 만든 프리미엄 영양 수제 간식',
     description: '맛있는 흰색 뼈다귀 간식 1개를 양쪽에서 사이좋게(장난스럽게!) 앙 물고 줄다리기하는 귀여운 두 마리 강아지입니다.',
-    brands: ['스위피', '트러스티푸드', '고위드테일', '알로키친 프리미엄 간식'],
+    brands: ['스위피', '트러스티푸드', '고위드테일', '알로키친', '허니콤츄'],
     hint: '화면 왼쪽 아래 잔디밭(어질리티 장애물 근처)에서 하나의 뼈다귀 간식을 함께 물고 있는 두 마리를 찾아보세요!',
     imageUrl: '/images/items/treat_share.png',
     target: {
@@ -97,7 +97,7 @@ export const HIDDEN_ITEMS: HiddenItem[] = [
     category: 'Play & Fun',
     tagline: '신나는 스트레스 해소와 즐거운 원반 놀이 시간',
     description: '푸른 잔디밭 도그런 원형 펜스 안에서 날아오는 빨간 원반을 향해 공중으로 멋지게 날아오른 날렵한 점핑 댕댕이입니다.',
-    brands: ['터그놀이, 노즈워크 장난감부터', '자동으로 움직이는 장난감까지'],
+    brands: ['바잇미', '트릭시', '버디볼', '그 외 다양한 봉제인형, 노즈워크, 삑삑이 장난감'],
     hint: '화면 오른쪽 아래 둥근 철조망(원형 도그런) 안에서 빨간 원반을 향해 점프하는 강아지를 찾아보세요!',
     imageUrl: '/images/items/frisbee_catch.png',
     target: {
