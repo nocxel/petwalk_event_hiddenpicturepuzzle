@@ -213,12 +213,12 @@ export default function CouponModal({
         });
         triggerToast('공유 메뉴가 열렸습니다! [이미지 저장]을 선택해주세요.');
       } else {
-        triggerToast('이미지를 1~2초간 길게 눌러서 사진첩에 저장해주세요!');
+        triggerToast('📸 지금 화면을 휴대폰 스크린샷(전원+볼륨 버튼)으로 캡처해주세요!');
       }
     } catch (err) {
       // 사용자가 공유 창을 닫은 경우(AbortError)는 무시
       if ((err as Error)?.name !== 'AbortError') {
-        triggerToast('이미지를 1~2초간 길게 눌러서 사진첩에 저장해주세요!');
+        triggerToast('📸 지금 화면을 휴대폰 스크린샷(전원+볼륨 버튼)으로 캡처해주세요!');
       }
     }
   };
@@ -240,15 +240,14 @@ export default function CouponModal({
       const fileName = `PETWALK_쿠폰_${discountRate}프로_${couponCode}.png`;
 
       // 1) 인스타그램 / 카카오톡 등 인앱 브라우저인 경우:
-      //    <a download>가 막혀있으므로 다운로드 시도 없이 바로 "길게 눌러 사진첩 저장 + 공유" 모달을 띄움
+      //    자동 다운로드가 막혀있으므로 깨끗한 스크린샷 촬영용 모달을 띄우고 직접 캡처 안내
       if (isInAppBrowser()) {
         setCapturedImageUrl(dataUrl);
-        triggerToast('👇 이미지를 꾹(길게) 눌러 사진첩에 저장해주세요!');
+        triggerToast('📸 지금 화면을 휴대폰 버튼(전원+볼륨)으로 직접 캡처해주세요!');
         return;
       }
 
-      // 2) 일반 브라우저(크롬, 사파리 등): 즉시 다운로드 실행 + 미리보기 모달도 함께 표시하여
-      //    모바일/PC 어디서든 확인 및 길게 눌러 저장·공유가 가능하도록 지원
+      // 2) 일반 브라우저(크롬, 사파리 등): 즉시 다운로드 실행 + 캡처 모달 함께 표시
       const link = document.createElement('a');
       link.download = fileName;
       link.href = dataUrl;
@@ -257,10 +256,10 @@ export default function CouponModal({
       document.body.removeChild(link);
 
       setCapturedImageUrl(dataUrl);
-      triggerToast('📷 쿠폰 이미지가 생성되었습니다! (길게 눌러 저장 가능)');
+      triggerToast('📷 쿠폰 이미지가 저장되었습니다! (직접 화면 캡처도 가능)');
     } catch (err) {
       console.error('Capture error:', err);
-      triggerToast('이미지 생성에 실패했습니다. 화면을 직접 스크린샷 캡처해주세요!');
+      triggerToast('📸 지금 이 화면을 휴대폰 스크린샷으로 직접 캡처해주세요!');
     } finally {
       setIsCapturing(false);
     }
@@ -551,6 +550,18 @@ export default function CouponModal({
             </div>
           ) : null}
 
+          {/* 화면 직접 캡처 안내 배너 (인스타그램 인앱 브라우저 대응) */}
+          <div className="bg-[#FFF4EB] border-2 border-[#F59E0B] rounded-2xl p-3 text-center space-y-1 shadow-sm">
+            <p className="text-xs sm:text-sm font-black text-[#B45309] flex items-center justify-center gap-1.5">
+              <Camera className="w-4 h-4 text-[#E66A2B] shrink-0" />
+              <span>지금 이 화면을 휴대폰으로 직접 캡처해주세요!</span>
+            </p>
+            <p className="text-[11px] text-[#7C5D48] leading-snug">
+              인스타그램 앱에서는 이미지 다운로드가 제한될 수 있습니다.<br />
+              <strong>휴대폰 화면 캡처(전원 + 볼륨 버튼)</strong>로 찍어주셔도 동일하게 사용 가능합니다!
+            </p>
+          </div>
+
           {/* Action Buttons */}
           <div className="space-y-2 pt-1">
             {/* 1. SCREENSHOT / CAPTURE BUTTON */}
@@ -564,7 +575,7 @@ export default function CouponModal({
               }`}
             >
               <Download className="w-5 h-5" />
-              <span>{isCapturing ? '쿠폰 저장 중...' : '📸 화면 캡처하기 (이미지로 저장)'}</span>
+              <span>{isCapturing ? '쿠폰 준비 중...' : '📸 쿠폰 크게 보기 / 이미지 저장'}</span>
             </button>
 
             {/* Sub actions */}
@@ -614,7 +625,7 @@ export default function CouponModal({
         </div>
       </div>
 
-      {/* 인앱 브라우저 / 모바일 전용: 이미지 길게 눌러 저장하기 & 공유 미리보기 모달 */}
+      {/* 스크린샷 촬영 전용 깔끔한 쿠폰 보기 모달 */}
       {capturedImageUrl && (
         <div
           className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto"
@@ -634,20 +645,21 @@ export default function CouponModal({
             </button>
 
             {/* 상단 안내 배지 및 타이틀 */}
-            <div className="space-y-1 pt-1">
+            <div className="space-y-1.5 pt-1">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF0E5] text-[#D9531E] text-xs font-extrabold">
                 <Camera className="w-3.5 h-3.5" />
-                <span>인스타그램·인앱 브라우저 저장 안내</span>
+                <span>화면 캡처(스크린샷) 안내</span>
               </div>
-              <h3 className="text-base sm:text-lg font-black text-[#3A2016]">
-                아래 쿠폰 이미지를 <span className="text-[#E66A2B] underline decoration-2">1~2초간 꾹</span> 눌러주세요!
+              <h3 className="text-base sm:text-lg font-black text-[#3A2016] leading-snug">
+                지금 이 화면을 그대로<br />
+                <span className="text-[#E66A2B] underline decoration-2">휴대폰 화면 캡처(스크린샷)</span> 해주세요!
               </h3>
               <p className="text-xs text-[#7A5A43] leading-relaxed">
-                팝업 메뉴에서 <strong>[사진 앱에 저장]</strong> 또는 <strong>[이미지 다운로드]</strong>를 선택하시면 사진첩에 바로 저장됩니다.
+                휴대폰의 <strong>[전원 버튼 + 볼륨 버튼]</strong>을 동시에 눌러 화면을 캡처하시면 사진첩에 바로 저장됩니다.
               </p>
             </div>
 
-            {/* 실제 <img> 태그 (길게 눌러 저장 가능하도록 pointer-events 및 기본 동작 허용) */}
+            {/* 실제 쿠폰 이미지 */}
             <div className="relative rounded-2xl overflow-hidden border-2 border-[#E66A2B] shadow-lg bg-white p-1.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -656,12 +668,12 @@ export default function CouponModal({
                 className="w-full h-auto rounded-xl select-auto pointer-events-auto"
                 style={{ WebkitTouchCallout: 'default' }}
               />
-              <div className="mt-1.5 py-1 px-2 bg-[#FFF5EB] rounded-lg text-[11px] font-bold text-[#C85A17] flex items-center justify-center gap-1 animate-pulse">
-                <span>👆 위 쿠폰 이미지를 손가락으로 꾹 눌러서 저장하세요!</span>
+              <div className="mt-1.5 py-1.5 px-2 bg-[#FFF5EB] rounded-lg text-xs font-extrabold text-[#C85A17] flex items-center justify-center gap-1">
+                <span>📸 지금 이 화면을 캡처해서 매장에 보여주세요!</span>
               </div>
             </div>
 
-            {/* 하단 액션 버튼들 (공유하기/저장하기 + 닫기) */}
+            {/* 하단 액션 버튼들 */}
             <div className="space-y-2 pt-1">
               {canWebShare && (
                 <button
@@ -669,13 +681,9 @@ export default function CouponModal({
                   className="w-full py-3 px-4 bg-gradient-to-r from-[#E66A2B] to-[#E5A93C] hover:brightness-105 active:scale-[0.99] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all"
                 >
                   <Share2 className="w-4 h-4" />
-                  <span>공유 / 사진첩에 바로 저장하기</span>
+                  <span>공유하기 (나에게 카톡 보내기 등)</span>
                 </button>
               )}
-
-              <p className="text-[11px] text-[#8C6B55] bg-[#FAF3EB] py-2 px-3 rounded-xl border border-[#E8DACB]">
-                💡 저장이 안 될 경우, 지금 이 화면을 그대로 <strong>휴대폰 스크린샷(전원+볼륨 버튼)</strong>으로 캡처하셔도 동일하게 사용 가능합니다!
-              </p>
 
               <button
                 onClick={() => setCapturedImageUrl(null)}
