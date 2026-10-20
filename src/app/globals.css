@@ -14,6 +14,9 @@
     font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Segoe UI", Roboto, sans-serif;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    overflow-x: hidden;
   }
 }
 

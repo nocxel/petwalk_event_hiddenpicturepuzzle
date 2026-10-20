@@ -319,11 +319,11 @@ export default function CouponModal({
 
           {is15Percent ? (
             <>
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-white/25 rounded-full text-xs font-black mb-1 backdrop-blur-md shadow-sm border border-yellow-200/40">
-                <Crown className="w-4 h-4 text-yellow-200 animate-bounce" />
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-white/25 rounded-full text-xs font-black mb-1 backdrop-blur-md shadow-sm border border-yellow-200/40 whitespace-nowrap">
+                <Crown className="w-4 h-4 text-yellow-200 animate-bounce shrink-0" />
                 <span className="tracking-wider text-yellow-100">LUCKY JACKPOT!</span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-black text-white flex items-center justify-center gap-1.5 drop-shadow-md">
+              <h2 className="text-lg sm:text-2xl font-black text-white flex items-center justify-center gap-1 sm:gap-1.5 drop-shadow-md whitespace-nowrap">
                 <span>🎉</span> 축하합니다! 최대혜택 당첨! <span>🎉</span>
               </h2>
               <p className="text-xs text-yellow-100 mt-1 font-semibold leading-relaxed">
@@ -332,14 +332,14 @@ export default function CouponModal({
             </>
           ) : (
             <>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 rounded-full text-xs font-bold mb-1 backdrop-blur-sm">
-                <Sparkles className="w-3.5 h-3.5 text-[#FFE8A3]" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 rounded-full text-xs font-bold mb-1 backdrop-blur-sm whitespace-nowrap">
+                <Sparkles className="w-3.5 h-3.5 text-[#FFE8A3] shrink-0" />
                 MISSION COMPLETE
               </div>
-              <h2 className="text-xl sm:text-2xl font-black text-white">
+              <h2 className="text-lg sm:text-2xl font-black text-white whitespace-nowrap">
                 축하합니다! 모두 찾으셨습니다 🎉
               </h2>
-              <p className="text-xs text-[#FFE0C2] mt-0.5">
+              <p className="text-xs text-[#FFE0C2] mt-0.5 leading-relaxed">
                 PETWALK 매장 및 택배 주문 시 사용 가능한 10% 할인 쿠폰이 발급되었습니다!
               </p>
             </>
@@ -347,11 +347,11 @@ export default function CouponModal({
         </div>
 
         {/* Scrollable Container */}
-        <div className="p-4 sm:p-5 space-y-4">
+        <div className="p-3.5 sm:p-5 space-y-3.5 sm:space-y-4">
           {/* THE CAPTURABLE COUPON CARD */}
           <div
             ref={couponCardRef}
-            className={`relative rounded-2xl border-2 border-dashed p-5 shadow-inner text-[#3A2016] overflow-hidden transition-all duration-300 ${
+            className={`relative rounded-2xl border-2 border-dashed p-4 sm:p-5 shadow-inner text-[#3A2016] overflow-hidden transition-all duration-300 ${
               is15Percent
                 ? 'bg-gradient-to-b from-[#FFFDF2] to-[#FFF7E6] border-[#F59E0B] shadow-amber-100'
                 : 'bg-gradient-to-b from-[#FFFDF9] to-[#FDF8F2] border-[#DDBFA8]'
@@ -372,35 +372,35 @@ export default function CouponModal({
 
             {/* Top brand header */}
             <div
-              className={`flex items-center justify-between pb-3 border-b ${
+              className={`flex items-center justify-between gap-2 pb-3 border-b ${
                 is15Percent ? 'border-[#FDE68A]' : 'border-[#EBD6C4]'
               }`}
             >
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🐾</span>
-                <div>
-                  <h3 className="font-black text-lg tracking-wider text-[#3A2016]">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-xl shrink-0">🐾</span>
+                <div className="min-w-0">
+                  <h3 className="font-black text-base sm:text-lg tracking-wider text-[#3A2016] leading-tight">
                     PETWALK
                   </h3>
-                  <p className="text-[10px] text-[#8C6B55] font-medium">
+                  <p className="text-[10px] text-[#8C6B55] font-medium truncate">
                     PREMIUM PET SELECT SHOP
                   </p>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1 shrink-0">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E66A2B] text-white">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E66A2B] text-white whitespace-nowrap">
                   매장 전용
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2563EB] text-white">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2563EB] text-white whitespace-nowrap">
                   택배 가능
                 </span>
               </div>
             </div>
 
             {/* Coupon Value Display */}
-            <div className="text-center py-4 relative">
+            <div className="text-center py-3.5 sm:py-4 relative">
               <span
-                className={`text-xs font-bold tracking-widest uppercase block mb-1 ${
+                className={`text-[11px] sm:text-xs font-bold tracking-widest uppercase block mb-1 ${
                   is15Percent ? 'text-[#B45309]' : 'text-[#C8672D]'
                 }`}
               >
@@ -416,27 +416,27 @@ export default function CouponModal({
                 <span className="text-2xl sm:text-3xl font-bold">OFF</span>
               </div>
 
-              <p className="text-sm font-bold text-[#3A2016] mt-1.5">
+              <p className="text-xs sm:text-sm font-bold text-[#3A2016] mt-1.5">
                 PETWALK 매장 전용 {discountRate}% 할인 쿠폰
               </p>
-              <p className="text-xs font-bold text-[#B45309] mt-0.5">
+              <p className="text-[11px] sm:text-xs font-bold text-[#B45309] mt-0.5">
                 {STORE_INFO.coupon.applicableItems}
               </p>
             </div>
 
             {/* Crucial Store Conditions & Instruction */}
             <div
-              className={`rounded-xl p-3 border text-center space-y-1.5 mb-3 ${
+              className={`rounded-xl p-2.5 sm:p-3 border text-center space-y-1.5 mb-3 ${
                 is15Percent
                   ? 'bg-[#FFFBEB] border-[#FDE68A]'
                   : 'bg-[#FAF0E6] border-[#E9D5C4]'
               }`}
             >
-              <p className="text-xs font-extrabold text-[#9A3412] flex items-center justify-center gap-1">
-                <AlertCircle className="w-3.5 h-3.5" />
-                {STORE_INFO.coupon.notice}
+              <p className="text-[11px] sm:text-xs font-extrabold text-[#9A3412] flex items-center justify-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{STORE_INFO.coupon.notice}</span>
               </p>
-              <p className="text-[11px] font-bold text-[#5C3821] bg-white/80 py-1 px-2 rounded-md border border-[#DFC3AD]">
+              <p className="text-[10px] sm:text-[11px] font-bold text-[#5C3821] bg-white/80 py-1 px-2 rounded-md border border-[#DFC3AD]">
                 👉 {STORE_INFO.coupon.instruction}
               </p>
             </div>
@@ -447,19 +447,19 @@ export default function CouponModal({
                 is15Percent ? 'border-[#FDE68A]' : 'border-[#EBD6C4]'
               }`}
             >
-              <div className="flex justify-between">
-                <span className="text-[#9E8270]">쿠폰 번호:</span>
-                <span className="font-mono font-bold text-[#3A2016] flex items-center gap-1">
+              <div className="flex justify-between items-center gap-2">
+                <span className="text-[#9E8270] shrink-0">쿠폰 번호:</span>
+                <span className="font-mono font-bold text-[#3A2016] flex items-center gap-1 whitespace-nowrap">
                   {couponCode}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-[#9E8270]">발급 일시:</span>
-                <span className="font-medium">{issueDate}</span>
+              <div className="flex justify-between items-center gap-2">
+                <span className="text-[#9E8270] shrink-0">발급 일시:</span>
+                <span className="font-medium whitespace-nowrap">{issueDate}</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[#9E8270]">유효 기간:</span>
-                <span className="font-bold text-[#E66A2B]">
+              <div className="flex justify-between items-center gap-2">
+                <span className="text-[#9E8270] shrink-0">유효 기간:</span>
+                <span className="font-bold text-[#E66A2B] text-right">
                   발급일로부터 30일 ({validUntil} 까지)
                 </span>
               </div>
@@ -491,13 +491,13 @@ export default function CouponModal({
           {canReissue ? (
             !hasVisitedInsta ? (
               /* 1단계: 인스타 좋아요 미션 버튼 */
-              <div className="bg-gradient-to-r from-[#FFF5F7] via-[#FFF0F5] to-[#FFF7ED] rounded-2xl p-4 border-2 border-[#F687B3] shadow-sm space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-black text-[#B83280]">
-                    <Heart className="w-4 h-4 text-[#E53E3E] fill-[#E53E3E] animate-pulse" />
-                    <span>인스타 좋아요 누르고 15% 재발급 찬스!</span>
+              <div className="bg-gradient-to-r from-[#FFF5F7] via-[#FFF0F5] to-[#FFF7ED] rounded-2xl p-3.5 sm:p-4 border-2 border-[#F687B3] shadow-sm space-y-2.5">
+                <div className="flex items-center justify-between gap-1.5">
+                  <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-black text-[#B83280] min-w-0">
+                    <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#E53E3E] fill-[#E53E3E] animate-pulse shrink-0" />
+                    <span className="truncate">인스타 좋아요 누르고 15% 재발급 찬스!</span>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E53E3E] text-white">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E53E3E] text-white whitespace-nowrap shrink-0">
                     15% 확률 50%
                   </span>
                 </div>
@@ -506,22 +506,22 @@ export default function CouponModal({
                 </p>
                 <button
                   onClick={handleOpenInstagram}
-                  className="w-full py-3 px-3 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCB045] hover:brightness-105 active:scale-[0.99] text-white font-black text-xs sm:text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-3 px-3 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCB045] hover:brightness-105 active:scale-[0.99] text-white font-black text-xs sm:text-sm rounded-xl shadow-md flex items-center justify-center gap-1.5 sm:gap-2 transition-all whitespace-nowrap"
                 >
-                  <InstagramIcon className="w-4 h-4" />
+                  <InstagramIcon className="w-4 h-4 shrink-0" />
                   <span>❤️ 인스타 좋아요 누르고 재발급 받기</span>
-                  <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                  <ExternalLink className="w-3.5 h-3.5 opacity-80 shrink-0" />
                 </button>
               </div>
             ) : (
               /* 2단계: 인스타 방문 완료 후 재발급 버튼 활성화 */
               <div className="bg-gradient-to-r from-[#FFF7ED] to-[#FEF3C7] rounded-2xl p-3.5 border-2 border-[#FBD38D] shadow-sm space-y-2 animate-fadeIn">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-extrabold text-[#C05621]">
-                    <Sparkles className="w-4 h-4 text-[#DD6B20]" />
-                    <span>미션 완료! 재발급 기회 잠금 해제 (1회 남음)</span>
+                <div className="flex items-center justify-between gap-1.5">
+                  <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-extrabold text-[#C05621] min-w-0">
+                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#DD6B20] shrink-0" />
+                    <span className="truncate">미션 완료! 재발급 잠금 해제 (1회)</span>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#DD6B20] text-white">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#DD6B20] text-white whitespace-nowrap shrink-0">
                     15% 확률 50%
                   </span>
                 </div>
@@ -535,9 +535,9 @@ export default function CouponModal({
                 <button
                   onClick={handleReissue}
                   disabled={isReissuing}
-                  className="w-full py-2.5 px-3 bg-gradient-to-r from-[#DD6B20] to-[#D69E2E] hover:brightness-105 active:scale-[0.99] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow flex items-center justify-center gap-1.5 transition-all disabled:opacity-75"
+                  className="w-full py-2.5 px-3 bg-gradient-to-r from-[#DD6B20] to-[#D69E2E] hover:brightness-105 active:scale-[0.99] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow flex items-center justify-center gap-1.5 transition-all disabled:opacity-75 whitespace-nowrap"
                 >
-                  <RefreshCw className={`w-4 h-4 ${isReissuing ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-4 h-4 shrink-0 ${isReissuing ? 'animate-spin' : ''}`} />
                   <span>
                     {isReissuing ? '행운의 쿠폰 재추첨 중... 🎲' : '🎲 15% 당첨 도전! 쿠폰 다시 뽑기'}
                   </span>
@@ -568,13 +568,13 @@ export default function CouponModal({
             <button
               onClick={handleCapture}
               disabled={isCapturing}
-              className={`w-full py-3.5 px-4 text-white font-bold text-sm sm:text-base rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] ${
+              className={`w-full py-3.5 px-4 text-white font-bold text-sm sm:text-base rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] whitespace-nowrap ${
                 is15Percent
                   ? 'bg-gradient-to-r from-[#D97706] via-[#EA580C] to-[#E66A2B] hover:brightness-105'
                   : 'bg-gradient-to-r from-[#E66A2B] to-[#E5A93C] hover:brightness-105'
               }`}
             >
-              <Download className="w-5 h-5" />
+              <Download className="w-5 h-5 shrink-0" />
               <span>{isCapturing ? '쿠폰 준비 중...' : '📸 쿠폰 크게 보기 / 이미지 저장'}</span>
             </button>
 
@@ -582,21 +582,21 @@ export default function CouponModal({
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={handleCopyCode}
-                className="py-2.5 px-3 bg-white hover:bg-[#FDF6EE] border border-[#DFC3AD] text-[#7A5A43] font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all"
+                className="py-2.5 px-3 bg-white hover:bg-[#FDF6EE] border border-[#DFC3AD] text-[#7A5A43] font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all whitespace-nowrap"
               >
                 {copiedCode ? (
-                  <Check className="w-3.5 h-3.5 text-green-600" />
+                  <Check className="w-3.5 h-3.5 text-green-600 shrink-0" />
                 ) : (
-                  <Copy className="w-3.5 h-3.5" />
+                  <Copy className="w-3.5 h-3.5 shrink-0" />
                 )}
                 <span>{copiedCode ? '복사 완료' : '쿠폰 번호 복사'}</span>
               </button>
 
               <button
                 onClick={onResetGame}
-                className="py-2.5 px-3 bg-white hover:bg-[#FDF6EE] border border-[#DFC3AD] text-[#7A5A43] font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all"
+                className="py-2.5 px-3 bg-white hover:bg-[#FDF6EE] border border-[#DFC3AD] text-[#7A5A43] font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all whitespace-nowrap"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
+                <RefreshCw className="w-3.5 h-3.5 shrink-0" />
                 <span>게임 다시하기</span>
               </button>
             </div>
@@ -605,7 +605,7 @@ export default function CouponModal({
           {/* Store Guide Info */}
           <div className="bg-[#FAF3EB] rounded-2xl p-3.5 border border-[#E8DACB] text-xs text-[#6B4B36] space-y-1.5">
             <div className="flex items-center gap-1.5 font-bold text-[#3A2016]">
-              <MapPin className="w-4 h-4 text-[#E66A2B]" />
+              <MapPin className="w-4 h-4 text-[#E66A2B] shrink-0" />
               <span>PETWALK 매장 및 택배 주문 안내</span>
             </div>
             <p className="text-[11px] text-[#7C5D48] leading-relaxed">
@@ -646,8 +646,8 @@ export default function CouponModal({
 
             {/* 상단 안내 배지 및 타이틀 */}
             <div className="space-y-1.5 pt-1">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF0E5] text-[#D9531E] text-xs font-extrabold">
-                <Camera className="w-3.5 h-3.5" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF0E5] text-[#D9531E] text-xs font-extrabold whitespace-nowrap">
+                <Camera className="w-3.5 h-3.5 shrink-0" />
                 <span>화면 캡처(스크린샷) 안내</span>
               </div>
               <h3 className="text-base sm:text-lg font-black text-[#3A2016] leading-snug">
@@ -680,7 +680,7 @@ export default function CouponModal({
                   onClick={() => handleShareImage(capturedImageUrl)}
                   className="w-full py-3 px-4 bg-gradient-to-r from-[#E66A2B] to-[#E5A93C] hover:brightness-105 active:scale-[0.99] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all"
                 >
-                  <Share2 className="w-4 h-4" />
+                  <Share2 className="w-4 h-4 shrink-0" />
                   <span>공유하기 (나에게 카톡 보내기 등)</span>
                 </button>
               )}
@@ -698,9 +698,9 @@ export default function CouponModal({
 
       {/* Floating Toast Notification */}
       {showToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[80] bg-[#3A2016] text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 animate-bounce whitespace-nowrap">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[80] w-max max-w-[92vw] bg-[#3A2016] text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-2xl flex items-center justify-center gap-2 text-center animate-bounce">
           <Sparkles className="w-3.5 h-3.5 text-[#FFE8A3] shrink-0" />
-          <span>{showToast}</span>
+          <span className="leading-snug">{showToast}</span>
         </div>
       )}
     </div>

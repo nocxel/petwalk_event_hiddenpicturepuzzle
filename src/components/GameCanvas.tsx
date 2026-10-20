@@ -446,24 +446,24 @@ export default function GameCanvas({
   return (
     <div className="relative w-full max-w-4xl mx-auto flex flex-col items-center select-none">
       {/* Zoom & Helper Toolbar */}
-      <div className="w-full flex items-center justify-between px-2 sm:px-3 py-1.5 text-xs text-[#8A664E]">
-        <div className="flex items-center gap-1.5 font-medium">
-          <span className="w-2 h-2 rounded-full bg-[#E66A2B] animate-pulse" />
-          <span className="text-[11px] sm:text-xs text-[#5A3822]">
+      <div className="w-full flex items-center justify-between gap-2 px-1 sm:px-3 py-1.5 text-xs text-[#8A664E]">
+        <div className="flex items-center gap-1.5 font-medium min-w-0">
+          <span className="w-2 h-2 rounded-full bg-[#E66A2B] animate-pulse shrink-0" />
+          <span className="text-[11px] sm:text-xs text-[#5A3822] leading-tight">
             {zoomLevel > 1 ? (
               <span>
-                화면을 <strong>손가락으로 쓱 밀어 이동</strong>하고, 타깃을 <strong>콕 터치</strong>하세요!
+                화면을 <strong>밀어 이동</strong>하고, 타깃을 <strong>터치</strong>하세요!
               </span>
             ) : (
               <span>
-                두 손가락을 벌리거나 <strong>[+] 버튼</strong>으로 확대하면 더 잘 보여요!
+                두 손가락으로 벌리거나 <strong>[+] 버튼</strong>으로 확대해보세요!
               </span>
             )}
           </span>
         </div>
 
         {/* Controls */}
-        <div className="flex items-center gap-1 bg-white border border-[#E8DCCF] rounded-full px-2 py-0.5 shadow-2xs">
+        <div className="flex items-center gap-0.5 sm:gap-1 bg-white border border-[#E8DCCF] rounded-full px-1.5 sm:px-2 py-0.5 shadow-2xs shrink-0">
           <button
             onClick={() => handleZoom(-0.4)}
             disabled={zoomLevel <= 1}
@@ -472,7 +472,7 @@ export default function GameCanvas({
           >
             <ZoomOut className="w-3.5 h-3.5" />
           </button>
-          <span className="text-[11px] font-extrabold px-1.5 min-w-[40px] text-center text-[#E66A2B]">
+          <span className="text-[10px] sm:text-[11px] font-extrabold px-1 min-w-[36px] sm:min-w-[40px] text-center text-[#E66A2B] whitespace-nowrap">
             {Math.round(zoomLevel * 100)}%
           </span>
           <button

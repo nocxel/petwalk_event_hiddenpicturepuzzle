@@ -36,7 +36,7 @@ export default function ItemTracker({
         </div>
 
         {/* 5 Product Cutout Cards Grid */}
-        <div className="grid grid-cols-5 gap-2 sm:gap-3">
+        <div className="grid grid-cols-5 gap-1.5 sm:gap-3">
           {items.map((item) => {
             const isFound = foundItemIds.includes(item.id);
             const isSelected = activeHintItemId === item.id;
@@ -45,7 +45,7 @@ export default function ItemTracker({
               <button
                 key={item.id}
                 onClick={() => onSelectHintItem(item.id)}
-                className={`group relative flex flex-col items-center justify-between p-1.5 sm:p-2.5 rounded-2xl transition-all duration-300 ${
+                className={`group relative flex flex-col items-center justify-between p-1 sm:p-2.5 rounded-xl sm:rounded-2xl transition-all duration-300 min-w-0 ${
                   isFound
                     ? 'bg-gradient-to-b from-[#EDF7F1] to-[#E2F2E8] border-2 border-[#52B788] shadow-sm ring-2 ring-[#52B788]/20'
                     : isSelected
@@ -56,7 +56,7 @@ export default function ItemTracker({
               >
                 {/* Found Stamp Badge */}
                 {isFound && (
-                  <div className="absolute -top-2 -right-1.5 z-20 bg-[#2D6A4F] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-md flex items-center gap-0.5 border border-white animate-scaleUp">
+                  <div className="absolute -top-1.5 -right-1 z-20 bg-[#2D6A4F] text-white text-[9px] font-black px-1 sm:px-1.5 py-0.5 rounded-full shadow-md flex items-center gap-0.5 border border-white animate-scaleUp whitespace-nowrap">
                     <Check className="w-2.5 h-2.5 stroke-[4]" />
                     <span className="hidden sm:inline">발견!</span>
                   </div>
@@ -71,7 +71,7 @@ export default function ItemTracker({
                 )}
 
                 {/* Real Product Cutout Image Container */}
-                <div className="relative w-full aspect-square max-w-[84px] max-h-[84px] flex items-center justify-center p-1 overflow-hidden">
+                <div className="relative w-full aspect-square max-w-[84px] max-h-[84px] flex items-center justify-center p-0.5 sm:p-1 overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item.imageUrl}
@@ -87,9 +87,9 @@ export default function ItemTracker({
                 </div>
 
                 {/* Product Name Label */}
-                <div className="w-full text-center mt-1 pt-1 border-t border-black/5">
+                <div className="w-full text-center mt-0.5 sm:mt-1 pt-1 border-t border-black/5">
                   <span
-                    className={`text-[10px] sm:text-xs font-bold leading-tight line-clamp-1 ${
+                    className={`block text-[10px] sm:text-xs font-bold leading-tight truncate ${
                       isFound
                         ? 'text-[#2D6A4F]'
                         : isSelected
@@ -100,7 +100,7 @@ export default function ItemTracker({
                     {item.name}
                   </span>
                   <span
-                    className={`text-[9px] font-medium block mt-0.5 ${
+                    className={`text-[9px] font-medium block mt-0.5 whitespace-nowrap ${
                       isFound
                         ? 'text-[#40916C] font-semibold'
                         : isSelected
