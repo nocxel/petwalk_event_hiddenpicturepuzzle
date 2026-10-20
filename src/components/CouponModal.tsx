@@ -9,11 +9,12 @@ import {
   AlertCircle,
   Copy,
   RefreshCw,
-  Trophy,
   Crown,
-  Gift,
   Heart,
   ExternalLink,
+  Share2,
+  X,
+  Camera,
 } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import confetti from 'canvas-confetti';
@@ -69,6 +70,15 @@ export default function CouponModal({
   const [isReissuing, setIsReissuing] = useState(false);
   const [showToast, setShowToast] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [capturedImageUrl, setCapturedImageUrl] = useState<string | null>(null);
+  const [canWebShare, setCanWebShare] = useState(false);
+
+  // 인앱 브라우저(인스타그램, 카카오톡, 페이스북, 라인, 네이버 등) 감지
+  const isInAppBrowser = () => {
+    if (typeof window === 'undefined') return false;
+    const ua = navigator.userAgent || '';
+    return /Instagram|KAKAOTALK|FBAN|FBAV|Line|NAVER|DaumApps|everytimeApp/i.test(ua);
+  };
 
   // 인스타그램 게시물 열기 및 방문 상태 갱신
   const handleOpenInstagram = () => {
@@ -161,18 +171,56 @@ export default function CouponModal({
     });
   };
 
-  // 모달 오픈 시 당첨된 쿠폰 할인율에 맞춰 이펙트 실행
+  // 모달 오픈 시 당첨된 쿠폰 할인율에 맞춰 이펙트 실행 + Web Share 지원 여부 확인
   useEffect(() => {
     if (discountRate === 15) {
       triggerMegaCelebration();
     } else {
       triggerStandardCelebration();
     }
+
+    if (typeof navigator !== 'undefined' && typeof navigator.canShare === 'function') {
+      setCanWebShare(true);
+    }
   }, [discountRate]);
 
   const triggerToast = (msg: string) => {
     setShowToast(msg);
     setTimeout(() => setShowToast(null), 3500);
+  };
+
+  // DataURL -> File 변환 헬퍼 (Web Share API용)
+  const dataUrlToFile = async (dataUrl: string, fileName: string): Promise<File> => {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    return new File([blob], fileName, { type: 'image/png' });
+  };
+
+  // 모바일 시스템 공유 시트 열기 (사진 앱에 저장 / 카톡 나에게 보내기 등)
+  const handleShareImage = async (imgUrl?: string) => {
+    const targetUrl = imgUrl || capturedImageUrl;
+    if (!targetUrl) return;
+
+    try {
+      const fileName = `PETWALK_쿠폰_${discountRate}프로_${couponCode}.png`;
+      const file = await dataUrlToFile(targetUrl, fileName);
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `PETWALK ${discountRate}% 할인 쿠폰`,
+          text: `PETWALK 매장 및 택배 주문 시 사용 가능한 ${discountRate}% 할인 쿠폰 (${couponCode})`,
+        });
+        triggerToast('공유 메뉴가 열렸습니다! [이미지 저장]을 선택해주세요.');
+      } else {
+        triggerToast('이미지를 1~2초간 길게 눌러서 사진첩에 저장해주세요!');
+      }
+    } catch (err) {
+      // 사용자가 공유 창을 닫은 경우(AbortError)는 무시
+      if ((err as Error)?.name !== 'AbortError') {
+        triggerToast('이미지를 1~2초간 길게 눌러서 사진첩에 저장해주세요!');
+      }
+    }
   };
 
   // 이미지 캡처 저장
@@ -189,15 +237,30 @@ export default function CouponModal({
         backgroundColor: '#FFFDF9',
       });
 
-      const link = document.createElement('a');
-      link.download = `PETWALK_쿠폰_${discountRate}프로_${couponCode}.png`;
-      link.href = dataUrl;
-      link.click();
+      const fileName = `PETWALK_쿠폰_${discountRate}프로_${couponCode}.png`;
 
-      triggerToast('📷 쿠폰 이미지가 저장되었습니다!');
+      // 1) 인스타그램 / 카카오톡 등 인앱 브라우저인 경우:
+      //    <a download>가 막혀있으므로 다운로드 시도 없이 바로 "길게 눌러 사진첩 저장 + 공유" 모달을 띄움
+      if (isInAppBrowser()) {
+        setCapturedImageUrl(dataUrl);
+        triggerToast('👇 이미지를 꾹(길게) 눌러 사진첩에 저장해주세요!');
+        return;
+      }
+
+      // 2) 일반 브라우저(크롬, 사파리 등): 즉시 다운로드 실행 + 미리보기 모달도 함께 표시하여
+      //    모바일/PC 어디서든 확인 및 길게 눌러 저장·공유가 가능하도록 지원
+      const link = document.createElement('a');
+      link.download = fileName;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setCapturedImageUrl(dataUrl);
+      triggerToast('📷 쿠폰 이미지가 생성되었습니다! (길게 눌러 저장 가능)');
     } catch (err) {
       console.error('Capture error:', err);
-      triggerToast('이미지 저장에 실패했습니다. 화면을 직접 스크린샷 캡처해주세요!');
+      triggerToast('이미지 생성에 실패했습니다. 화면을 직접 스크린샷 캡처해주세요!');
     } finally {
       setIsCapturing(false);
     }
@@ -551,10 +614,84 @@ export default function CouponModal({
         </div>
       </div>
 
+      {/* 인앱 브라우저 / 모바일 전용: 이미지 길게 눌러 저장하기 & 공유 미리보기 모달 */}
+      {capturedImageUrl && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto"
+          onClick={() => setCapturedImageUrl(null)}
+        >
+          <div
+            className="w-full max-w-sm my-auto bg-[#FFFDF9] rounded-3xl p-4 sm:p-5 shadow-2xl border-2 border-[#EAD5C2] space-y-3.5 text-center relative animate-scaleUp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 닫기 X 버튼 */}
+            <button
+              onClick={() => setCapturedImageUrl(null)}
+              className="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-[#F5EBE1] hover:bg-[#EAD5C2] text-[#5C3821] flex items-center justify-center transition-colors"
+              aria-label="닫기"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* 상단 안내 배지 및 타이틀 */}
+            <div className="space-y-1 pt-1">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF0E5] text-[#D9531E] text-xs font-extrabold">
+                <Camera className="w-3.5 h-3.5" />
+                <span>인스타그램·인앱 브라우저 저장 안내</span>
+              </div>
+              <h3 className="text-base sm:text-lg font-black text-[#3A2016]">
+                아래 쿠폰 이미지를 <span className="text-[#E66A2B] underline decoration-2">1~2초간 꾹</span> 눌러주세요!
+              </h3>
+              <p className="text-xs text-[#7A5A43] leading-relaxed">
+                팝업 메뉴에서 <strong>[사진 앱에 저장]</strong> 또는 <strong>[이미지 다운로드]</strong>를 선택하시면 사진첩에 바로 저장됩니다.
+              </p>
+            </div>
+
+            {/* 실제 <img> 태그 (길게 눌러 저장 가능하도록 pointer-events 및 기본 동작 허용) */}
+            <div className="relative rounded-2xl overflow-hidden border-2 border-[#E66A2B] shadow-lg bg-white p-1.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={capturedImageUrl}
+                alt={`PETWALK ${discountRate}% 할인 쿠폰`}
+                className="w-full h-auto rounded-xl select-auto pointer-events-auto"
+                style={{ WebkitTouchCallout: 'default' }}
+              />
+              <div className="mt-1.5 py-1 px-2 bg-[#FFF5EB] rounded-lg text-[11px] font-bold text-[#C85A17] flex items-center justify-center gap-1 animate-pulse">
+                <span>👆 위 쿠폰 이미지를 손가락으로 꾹 눌러서 저장하세요!</span>
+              </div>
+            </div>
+
+            {/* 하단 액션 버튼들 (공유하기/저장하기 + 닫기) */}
+            <div className="space-y-2 pt-1">
+              {canWebShare && (
+                <button
+                  onClick={() => handleShareImage(capturedImageUrl)}
+                  className="w-full py-3 px-4 bg-gradient-to-r from-[#E66A2B] to-[#E5A93C] hover:brightness-105 active:scale-[0.99] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>공유 / 사진첩에 바로 저장하기</span>
+                </button>
+              )}
+
+              <p className="text-[11px] text-[#8C6B55] bg-[#FAF3EB] py-2 px-3 rounded-xl border border-[#E8DACB]">
+                💡 저장이 안 될 경우, 지금 이 화면을 그대로 <strong>휴대폰 스크린샷(전원+볼륨 버튼)</strong>으로 캡처하셔도 동일하게 사용 가능합니다!
+              </p>
+
+              <button
+                onClick={() => setCapturedImageUrl(null)}
+                className="w-full py-2.5 px-4 bg-[#EFE5DC] hover:bg-[#E5D6C8] text-[#4A2E1B] font-bold text-xs sm:text-sm rounded-xl transition-colors"
+              >
+                확인 (닫기)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Floating Toast Notification */}
       {showToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] bg-[#3A2016] text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 animate-bounce">
-          <Sparkles className="w-3.5 h-3.5 text-[#FFE8A3]" />
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[80] bg-[#3A2016] text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 animate-bounce whitespace-nowrap">
+          <Sparkles className="w-3.5 h-3.5 text-[#FFE8A3] shrink-0" />
           <span>{showToast}</span>
         </div>
       )}
