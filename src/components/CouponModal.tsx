@@ -38,7 +38,7 @@ function InstagramIcon({ className = 'w-4 h-4' }: { className?: string }) {
   );
 }
 
-const INSTAGRAM_POST_URL = 'https://www.instagram.com/p/DeeNI2iCZhe/';
+const INSTAGRAM_POST_URL = 'https://www.instagram.com/p/Det4MiYjwVP/';
 
 interface CouponModalProps {
   couponCode: string;
